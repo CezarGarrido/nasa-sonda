@@ -25,7 +25,16 @@ type Command struct {
 }
 
 func (handler *SondaHandler) MakeRoutes(r *mux.Router) {
+	r.HandleFunc("/api/sonda", handler.FindSonda).Methods("GET")
 	r.HandleFunc("/api/sonda/commands", handler.Commands).Methods("POST")
+	r.HandleFunc("/api/sonda/restart", handler.RestartSondaPosition).Methods("PUT")
+}
+
+func (handler *SondaHandler) FindSonda(w http.ResponseWriter, r *http.Request) {
+	JSON(w, handler.sonda, http.StatusOK)
+}
+func (handler *SondaHandler) RestartSondaPosition(w http.ResponseWriter, r *http.Request) {
+	JSON(w, handler.sonda.Restart(), http.StatusOK)
 }
 
 func (handler *SondaHandler) Commands(w http.ResponseWriter, r *http.Request) {

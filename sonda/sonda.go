@@ -45,7 +45,7 @@ func (probe *Probe) ResetCounters() {
 	probe.countY = 0
 }
 
-// Move - movimentar. Para cada comando M a sonda se move uma posição na direção à qual sua face está apontada.
+// IsValidPosition - movimentar. Para cada comando M a sonda se move uma posição na direção à qual sua face está apontada.
 func (probe *Probe) IsValidPosition() bool {
 	if (probe.Direction == Baixo || probe.Direction == Esquerda) && (probe.X > 0 || probe.Y > 0) {
 		return false
@@ -53,6 +53,7 @@ func (probe *Probe) IsValidPosition() bool {
 	return (probe.X >= 0 && probe.X <= 4) && (probe.Y >= 0 && probe.Y <= 4)
 }
 
+// Move - movimentar. Para cada comando M a sonda se move uma posição na direção à qual sua face está apontada.
 func (probe *Probe) Move() error {
 
 	switch probe.Direction {
@@ -140,6 +141,7 @@ func (probe *Probe) Restart() *Probe {
 	probe.X = 0
 	probe.Y = 0
 	probe.lastMove = ""
+	probe.SequenceMovements = ""
 	probe.ResetCounters()
 	return probe
 
@@ -151,7 +153,6 @@ func (probe *Probe) Run(commands []string) (err error) {
 	for i, command := range commands {
 		err = probe.runCommand(count, i, command)
 		if err != nil {
-			probe.Restart()
 			break
 		}
 	}
@@ -175,12 +176,23 @@ func (probe *Probe) runCommand(count int, i int, command string) (err error) {
 	}
 	if command == "M" {
 		err = probe.Move()
+
 		if count-i == 1 {
 			if probe.countY > 0 {
-				probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countY) + " casas no eixo y"
+				if probe.lastMove == "M" {
+					probe.SequenceMovements += "andou " + strconv.Itoa(probe.countY) + " casas no eixo y"
+				} else {
+					probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countY) + " casas no eixo y"
+				}
 			}
 			if probe.countX > 0 {
-				probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countX) + " casas no eixo y"
+				if probe.lastMove == "M" {
+					if probe.lastMove == "M" {
+						probe.SequenceMovements += "andou " + strconv.Itoa(probe.countX) + " casas no eixo x"
+					} else {
+						probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countX) + " casas no eixo x"
+					}
+				}
 			}
 		}
 		probe.lastMove = command
