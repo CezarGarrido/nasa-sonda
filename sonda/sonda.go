@@ -173,9 +173,11 @@ func (probe *Probe) Restart() *Probe {
 func (probe *Probe) Run(commands []string) (err error) {
 	count := len(commands)
 	probe.SequenceMovements = "a sonda "
+	lastDirection := probe.Direction
 	for i, command := range commands {
 		err = probe.runCommand(count, i, command)
 		if err != nil {
+			probe.Direction = lastDirection
 			break
 		}
 	}

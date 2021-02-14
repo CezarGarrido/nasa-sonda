@@ -51,7 +51,7 @@ func (handler *SondaHandler) Commands(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(b, &command)
 	if err != nil {
 		log.Println(err.Error())
-		Error(w, err, http.StatusInternalServerError)
+		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

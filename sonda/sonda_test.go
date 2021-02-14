@@ -96,15 +96,15 @@ func TestIsLastValidPosition(t *testing.T) {
 	}
 
 	var tests = []TestPosition{
-		{0, 5, sonda.Esquerda, false},
-		{0, 4, sonda.Esquerda, false},
-		{2, 2, sonda.Esquerda, false},
-		{0, 5, sonda.Baixo, false},
-		{0, 4, sonda.Baixo, false},
-		{2, 2, sonda.Baixo, false},
-		{-0, -5, sonda.Baixo, false},
-		{-10, -52, sonda.Direita, false},
-		{0, 5, sonda.Esquerda, false},
+		{0, 5, sonda.LEFT, false},
+		{0, 4, sonda.LEFT, false},
+		{2, 2, sonda.LEFT, false},
+		{0, 5, sonda.BOTTOM, false},
+		{0, 4, sonda.BOTTOM, false},
+		{2, 2, sonda.BOTTOM, false},
+		{-0, -5, sonda.BOTTOM, false},
+		{-10, -52, sonda.RIGHT, false},
+		{0, 5, sonda.RIGHT, false},
 	}
 
 	for _, tt := range tests {
