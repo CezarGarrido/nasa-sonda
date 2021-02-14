@@ -75,11 +75,11 @@ func (probe *Probe) Move() error {
 	lastY := probe.Y
 
 	switch probe.Direction {
-	case Cima:
+	case TOP:
 		probe.MoveY()
 	case RIGHT:
 		probe.MoveX()
-	case Baixo:
+	case BOTTOM:
 		probe.MoveY()
 	case LEFT:
 		probe.MoveX()
@@ -100,7 +100,7 @@ func (probe *Probe) Rotate90DegLeft() {
 		probe.Direction = LEFT
 	case RIGHT:
 		probe.Direction = TOP
-	case Baixo:
+	case BOTTOM:
 		probe.Direction = RIGHT
 	case LEFT:
 		probe.Direction = BOTTOM
