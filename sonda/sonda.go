@@ -6,53 +6,56 @@ import (
 	"strconv"
 )
 
-// Direction
+// Direction: Represents the directions the probe can move and rotate
 type Direction string
 
+// The possible directions listed and mapped in PT-BR
 const (
-	Esquerda Direction = "E" // E - Esquerda
-	Direita            = "D" // D - Direita
-	Cima               = "C" // C - Cima
-	Baixo              = "B" // B - Baixo
+	LEFT   Direction = "E" // PT-BR: E - Esquerda
+	RIGHT            = "D" // PT-BR: D - Direita
+	TOP              = "C" // PT-BR: C - Cima
+	BOTTOM           = "B" // PT-BR: B - Baixo
 )
 
-// Probe
+// Probe: Structure that represents the Probe, with position and direction and movement information
 type Probe struct {
-	X                 int       `json:"x"`
-	Y                 int       `json:"y"`
-	Direction         Direction `json:"face"`
-	SequenceMovements string    `json:"sequence_movements"`
-	countX            int
-	countY            int
-	lastMove          string
+	X                 int       `json:"x"`                  // Position X
+	Y                 int       `json:"y"`                  // Position y
+	Direction         Direction `json:"face"`               // Direction
+	SequenceMovements string    `json:"sequence_movements"` // Description of the movement that the probe does
+	countX            int       // Amount that the probe moves in X in a complete sequence
+	countY            int       // Amount that the probe moves in Y in a complete sequence
+	lastCommand       string    // The penultimate command the probe took
 }
 
-// NewProbe:
+// NewProbe : Creates and returns a new probe with the initial state
 func NewProbe() *Probe {
 	return &Probe{
 		X:         0,
 		Y:         0,
-		Direction: Direita,
+		Direction: RIGHT,
 		countX:    0,
 		countY:    0,
 	}
 
 }
 
+// Reset the quantity counters
 func (probe *Probe) ResetCounters() {
 	probe.countX = 0
 	probe.countY = 0
 }
 
-// IsValidPosition - movimentar. Para cada comando M a sonda se move uma posição na direção à qual sua face está apontada.
+// IsValidPosition : Validates the current state of the probe, whether the movement it made is valid or not
 func (probe *Probe) IsValidPosition() bool {
-	if (probe.Direction == Baixo || probe.Direction == Esquerda) && (probe.X > 0 || probe.Y > 0) {
+	if (probe.Direction == BOTTOM || probe.Direction == LEFT) && (probe.X > 0 || probe.Y > 0) {
 		return false
 	}
 	return (probe.X >= 0 && probe.X <= 4) && (probe.Y >= 0 && probe.Y <= 4)
 }
 
-// Move - movimentar. Para cada comando M a sonda se move uma posição na direção à qual sua face está apontada.
+// Move : For each M command, the probe moves one position in the direction that its face is pointed.
+// Returns error if it is an invalid state
 func (probe *Probe) Move() error {
 
 	lastX := probe.X
@@ -61,11 +64,11 @@ func (probe *Probe) Move() error {
 	switch probe.Direction {
 	case Cima:
 		probe.MoveY()
-	case Direita:
+	case RIGHT:
 		probe.MoveX()
 	case Baixo:
 		probe.MoveY()
-	case Esquerda:
+	case LEFT:
 		probe.MoveX()
 	}
 
@@ -77,19 +80,19 @@ func (probe *Probe) Move() error {
 	return nil
 }
 
-// GE - girar 90 graus à esquerda
-func (probe *Probe) GE() {
+// Rotate90DegLeft : Rotate 90 degrees to the left
+func (probe *Probe) Rotate90DegLeft() {
 	switch probe.Direction {
-	case Cima:
-		probe.Direction = Esquerda
-	case Direita:
-		probe.Direction = Cima
+	case TOP:
+		probe.Direction = LEFT
+	case RIGHT:
+		probe.Direction = TOP
 	case Baixo:
-		probe.Direction = Direita
-	case Esquerda:
-		probe.Direction = Baixo
+		probe.Direction = RIGHT
+	case LEFT:
+		probe.Direction = BOTTOM
 	}
-	if probe.lastMove == "M" {
+	if probe.lastCommand == "M" {
 		if probe.countY > 0 {
 			probe.SequenceMovements += "se moveu " + strconv.Itoa(probe.countY) + " casas no eixo y, "
 		}
@@ -101,19 +104,19 @@ func (probe *Probe) GE() {
 
 }
 
-// GD - girar 90 graus à direta
-func (probe *Probe) GD() {
+// Rotate90DegRight : Rotate 90 degrees to the right
+func (probe *Probe) Rotate90DegRight() {
 	switch probe.Direction {
-	case Cima:
-		probe.Direction = Direita
-	case Direita:
-		probe.Direction = Baixo
-	case Baixo:
-		probe.Direction = Esquerda
-	case Esquerda:
-		probe.Direction = Cima
+	case TOP:
+		probe.Direction = RIGHT
+	case RIGHT:
+		probe.Direction = BOTTOM
+	case BOTTOM:
+		probe.Direction = LEFT
+	case LEFT:
+		probe.Direction = TOP
 	}
-	if probe.lastMove == "M" {
+	if probe.lastCommand == "M" {
 		if probe.countY > 0 {
 			probe.SequenceMovements += "se moveu " + strconv.Itoa(probe.countY) + " casas no eixo y, "
 		}
@@ -124,27 +127,31 @@ func (probe *Probe) GD() {
 	probe.SequenceMovements += "girou para direita, "
 }
 
+// MoveX : A move in x
 func (probe *Probe) MoveX() {
 	probe.X += 1
 	probe.countX++
 }
 
+// MoveY : A move in y
 func (probe *Probe) MoveY() {
 	probe.Y += 1
 	probe.countY++
 }
 
-// Restart-
+// Restart : Sends the probe to the initial state
 func (probe *Probe) Restart() *Probe {
 	probe.X = 0
 	probe.Y = 0
-	probe.lastMove = ""
+	probe.lastCommand = ""
+	probe.Direction = RIGHT
 	probe.SequenceMovements = ""
 	probe.ResetCounters()
 	return probe
-
 }
 
+// Run : Receive a list of commands,
+// And for each command it executes a function, returning an error if the probe goes into an unconscious state
 func (probe *Probe) Run(commands []string) (err error) {
 	count := len(commands)
 	probe.SequenceMovements = "a sonda "
@@ -161,14 +168,14 @@ func (probe *Probe) Run(commands []string) (err error) {
 func (probe *Probe) runCommand(count int, i int, command string) (err error) {
 
 	if command == "GE" {
-		probe.GE()
-		probe.lastMove = command
+		probe.Rotate90DegLeft()
+		probe.lastCommand = command
 		probe.ResetCounters()
 		return
 	}
 	if command == "GD" {
-		probe.GD()
-		probe.lastMove = command
+		probe.Rotate90DegRight()
+		probe.lastCommand = command
 		probe.ResetCounters()
 		return
 	}
@@ -177,14 +184,14 @@ func (probe *Probe) runCommand(count int, i int, command string) (err error) {
 
 		if count-i == 1 {
 			if probe.countY > 0 {
-				if probe.lastMove == "M" {
+				if probe.lastCommand == "M" {
 					probe.SequenceMovements += "andou " + strconv.Itoa(probe.countY) + " casas no eixo y"
 				} else {
 					probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countY) + " casas no eixo y"
 				}
 			}
 			if probe.countX > 0 {
-				if probe.lastMove == "M" {
+				if probe.lastCommand == "M" {
 					probe.SequenceMovements += "andou " + strconv.Itoa(probe.countX) + " casas no eixo x"
 				} else {
 					probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countX) + " casas no eixo x"
@@ -192,7 +199,7 @@ func (probe *Probe) runCommand(count int, i int, command string) (err error) {
 
 			}
 		}
-		probe.lastMove = command
+		probe.lastCommand = command
 		return
 	}
 
