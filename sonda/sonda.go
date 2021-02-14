@@ -1,7 +1,6 @@
 package sonda
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -56,6 +55,9 @@ func (probe *Probe) IsValidPosition() bool {
 // Move - movimentar. Para cada comando M a sonda se move uma posição na direção à qual sua face está apontada.
 func (probe *Probe) Move() error {
 
+	lastX := probe.X
+	lastY := probe.Y
+
 	switch probe.Direction {
 	case Cima:
 		probe.MoveY()
@@ -68,15 +70,11 @@ func (probe *Probe) Move() error {
 	}
 
 	if !probe.IsValidPosition() {
-		return errors.New(fmt.Sprintf("Um movimento inválido foi detectado, infelizmente a sonda ainda não possui a habilidade de navegar na area {\"x\": %d, \"y\": %d}", probe.X, probe.Y))
+		probe.X = lastX
+		probe.Y = lastY
+		return errors.New(fmt.Sprintf("Um movimento inválido foi detectado, infelizmente a sonda ainda não possui a habilidade de navegar nessa direção"))
 	}
 	return nil
-}
-
-// Print -
-func (probe *Probe) Print() {
-	b, _ := json.MarshalIndent(probe, "", "  ")
-	fmt.Println(string(b))
 }
 
 // GE - girar 90 graus à esquerda
@@ -187,12 +185,11 @@ func (probe *Probe) runCommand(count int, i int, command string) (err error) {
 			}
 			if probe.countX > 0 {
 				if probe.lastMove == "M" {
-					if probe.lastMove == "M" {
-						probe.SequenceMovements += "andou " + strconv.Itoa(probe.countX) + " casas no eixo x"
-					} else {
-						probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countX) + " casas no eixo x"
-					}
+					probe.SequenceMovements += "andou " + strconv.Itoa(probe.countX) + " casas no eixo x"
+				} else {
+					probe.SequenceMovements += "e andou mais " + strconv.Itoa(probe.countX) + " casas no eixo x"
 				}
+
 			}
 		}
 		probe.lastMove = command

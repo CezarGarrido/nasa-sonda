@@ -24,15 +24,16 @@ type Command struct {
 	Movimentos []string
 }
 
-func (handler *SondaHandler) MakeRoutes(r *mux.Router) {
-	r.HandleFunc("/api/sonda", handler.FindSonda).Methods("GET")
-	r.HandleFunc("/api/sonda/commands", handler.Commands).Methods("POST")
-	r.HandleFunc("/api/sonda/restart", handler.RestartSondaPosition).Methods("PUT")
+func (handler *SondaHandler) MakeRoutes(router *mux.Router) {
+	router.HandleFunc("/api/sonda", handler.FindSonda).Methods("GET")
+	router.HandleFunc("/api/sonda/commands", handler.Commands).Methods("POST")
+	router.HandleFunc("/api/sonda/restart", handler.RestartSondaPosition).Methods("PUT")
 }
 
 func (handler *SondaHandler) FindSonda(w http.ResponseWriter, r *http.Request) {
 	JSON(w, handler.sonda, http.StatusOK)
 }
+
 func (handler *SondaHandler) RestartSondaPosition(w http.ResponseWriter, r *http.Request) {
 	JSON(w, handler.sonda.Restart(), http.StatusOK)
 }
@@ -41,7 +42,7 @@ func (handler *SondaHandler) Commands(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err.Error())
-		ERROR(w, err, http.StatusBadRequest)
+		Error(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -50,13 +51,13 @@ func (handler *SondaHandler) Commands(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(b, &command)
 	if err != nil {
 		log.Println(err.Error())
-		ERROR(w, err, http.StatusBadRequest)
+		Error(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	err = handler.sonda.Run(command.Movimentos)
 	if err != nil {
-		ERROR(w, err.Error(), http.StatusBadRequest)
+		Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -74,7 +75,7 @@ func JSON(w http.ResponseWriter, body interface{}, status int) {
 	w.Write(payload)
 }
 
-func ERROR(w http.ResponseWriter, err interface{}, status int) {
+func Error(w http.ResponseWriter, err interface{}, status int) {
 
 	payload, err := json.Marshal(map[string]interface{}{
 		"erro": err,

@@ -18,7 +18,7 @@ func main() {
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"POST", "GET", "OPTIONS", "PUT", "DELETE"})
 
-	log.Println("Run on port:" + port)
+	log.Println("Run on port:"+ port)
 
 	router := mux.NewRouter()
 	sonda := sonda.NewProbe()
