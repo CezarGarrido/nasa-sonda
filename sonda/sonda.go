@@ -1,3 +1,15 @@
+// The probe package implements a framework to manipulate a probe in a rectangular area.
+// The position of the probe is represented by its x and y axis, and the direction it is pointed by the initial letter,
+// with valid directions being:
+//  E - Left
+//  D - Right
+//  C - Up
+//  B - Low
+// The probe accepts three commands:
+//  GE - rotate left 90 degrees
+//  GD - rotate 90 degrees to the right
+//  M - move. For each M command, the probe moves one position in the direction that its face is pointed.
+
 package sonda
 
 import (
@@ -19,8 +31,8 @@ const (
 
 // Probe: Structure that represents the Probe, with position and direction and movement information
 type Probe struct {
-	X                 int       `json:"x"`                  // Position X
-	Y                 int       `json:"y"`                  // Position y
+	X                 int       `json:"x"`                  // Axis X
+	Y                 int       `json:"y"`                  // Axis y
 	Direction         Direction `json:"face"`               // Direction
 	SequenceMovements string    `json:"sequence_movements"` // Description of the movement that the probe does
 	countX            int       // Amount that the probe moves in X in a complete sequence
@@ -47,6 +59,7 @@ func (probe *Probe) ResetCounters() {
 }
 
 // IsValidPosition : Validates the current state of the probe, whether the movement it made is valid or not
+// Simple comparisons are made to calculate whether a position is valid
 func (probe *Probe) IsValidPosition() bool {
 	if (probe.Direction == BOTTOM || probe.Direction == LEFT) && (probe.X > 0 || probe.Y > 0) {
 		return false
@@ -152,6 +165,11 @@ func (probe *Probe) Restart() *Probe {
 
 // Run : Receive a list of commands,
 // And for each command it executes a function, returning an error if the probe goes into an unconscious state
+// The probe accepts three commands:
+//  GE - rotate left 90 degrees
+//  GD - rotate 90 degrees to the right
+//  M - move. For each M command, the probe moves one position in the direction that its face is pointed.
+
 func (probe *Probe) Run(commands []string) (err error) {
 	count := len(commands)
 	probe.SequenceMovements = "a sonda "
