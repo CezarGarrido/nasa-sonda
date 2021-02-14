@@ -47,18 +47,18 @@ $ go build main.go
 ### Docker
 Nasa Probe is very easy to install and deploy in a Docker container.
 
-By default, the Docker will expose port 8089, so change this within the Dockerfile if necessary. 
+The Docker will expose port 8089, so change this within the Dockerfile if necessary. 
 When ready, simply use the Dockerfile to build the image.
 
 ```sh
-$ cd nasa-app
-$ docker build -t nasa-probe .
+$ cd nasa-sonda
+$ docker build -t nasa-sonda .
 ```
 
 Once done, run the Docker image and map the port to whatever you wish on your host. In this example, we simply map port 8089 of the host to port 8089 of the Docker (or whatever port was exposed in the Dockerfile):
 
 ```sh
-$ docker container run -p 8889:8889 sonda
+$ docker container run -p 8889:8889 nasa-sonda
 ```
 
 Run with docker-compose
@@ -75,7 +75,7 @@ Verify the deployment by navigating to your server address in your preferred bro
 
 #### Deploy on Heroku
 
-Nasa Probe requires heroku-cli [heroku-cli](https://devcenter.heroku.com/articles/getting-started-with-go#set-up) to deploy.
+Nasa Probe requires [heroku-cli](https://devcenter.heroku.com/articles/getting-started-with-go#set-up) to deploy.
 
 If you don't have a heroku account yet, see  [heroku](https://devcenter.heroku.com)
 
